@@ -1,5 +1,7 @@
 # **Increased interest rates are associated with increased requested loan amounts and lower FICO scores**
 
+*Assignment submitted for Coursera's Data Analysis (Johns Hopkins University) Course*
+
 ## **Introduction**
 
 Lending Club [1] is an online peer-to-peer lending company, which brings together people in need of credit (borrowers) with people who want to get a return on their savings (investors). The online platform claims to make the whole process of lending and borrowing faster and better by reducing cost and complexity compared with conventional banking, hence offering better rates to borrowers and better returns to investors. The whole process relies on assigning a grade to loan requests made by borrowers depending on their credit score, credit history, desired loan amount and debt-to-income ratio [2]. The assigned grades then determine interest rate and fees payable by the borrower for the requested loan. Grades range from A1 (lowest rate) to G5 (highest rate) with corresponding rates ranging from 6.03% to 24.89% as of 2/16/2013 [3]. Investors can then choose between lower-risk (high grade) lower-return investments or higher risk (low grade) higher return investment.
