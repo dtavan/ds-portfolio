@@ -1,0 +1,312 @@
+Raw Lending Club Analysis
+========================
+
+------
+
+### Load libraries
+
+```{r}
+library(Hmisc)
+```
+
+
+------
+
+## Processing
+
+Download the data, read the data in and save the raw data as an RDA file
+
+```{r loadData,cache=TRUE}
+getwd()
+download.file("https://spark-public.s3.amazonaws.com/dataanalysis/loansData.rda",destfile="../../data/loansData.rda")
+dateDownloaded <- date()
+dateDownloaded
+load('../../data/loansData.rda')
+```
+
+
+### Look at the data set
+
+```{r, dependson="loadData"}
+dim(loansData)
+head(loansData)
+summary(loansData)
+sapply(loansData[1,],class)
+```
+
+*Interest.Rate* and *Debt.To.Income.Ratio* variables have to be transformed from `factor` type to `numeric type`
+
+
+### Fix columns that have wrong variable types
+```{r, dependson="loadData"}
+loansData <- transform(loansData, Interest.Rate = as.numeric(sub("%","",Interest.Rate)),
+                       Debt.To.Income.Ratio = as.numeric(sub("%","",Debt.To.Income.Ratio)))
+```
+
+
+### Find out about missing values and take out imcomplete cases
+
+```{r, dependson="loadData"}
+table(is.na(loansData))
+loansData <- loansData[complete.cases(loansData),]
+```
+
+
+### Add a variable corresponding the percentage of the requested amount that was finally loaned to the applicant
+
+```{r, dependson="loadData"}
+Percent.Funded <- round(100*(1 - (loansData$Amount.Requested-loansData$Amount.Funded.By.Investors)/loansData$Amount.Requested), 2)
+loansData$Percent.Funded <- Percent.Funded
+```
+
+
+
+------
+
+## Exploratory analysis
+
+### Make some univariate tables
+
+```{r, dependson="loadData"}
+length(unique(loansData$Interest.Rate))
+length(unique(loansData$Debt.To.Income.Ratio))
+length(unique(loansData$Loan.Purpose))
+length(unique(loansData$FICO.Range))
+length(unique(loansData$Employment.Length))
+table(loansData$Loan.Purpose)
+table(loansData$State)
+table(loansData$FICO.Range)
+table(loansData$Employment.Length)
+```
+
+
+### Make some univariate plots/summaries
+
+```{r, dependson="loadData"}
+hist(loansData$Amount.Requested,col="blue")
+quantile(loansData$Amount.Requested)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Amount.Funded.By.Investors,col="blue")
+quantile(loansData$Amount.Funded.By.Investors)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Interest.Rate,col="blue")
+quantile(loansData$Interest.Rate)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Debt.To.Income.Ratio,col="blue")
+quantile(loansData$Debt.To.Income.Ratio)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Monthly.Income,col="blue")
+quantile(loansData$Monthly.Income)
+plot(loansData$Monthly.Income,col="blue")
+hist(loansData$Monthly.Income[loansData$Monthly.Income < 39000],col="blue",breaks=90)
+loansData <- loansData[loansData$Monthly.Income < 39000,]
+```
+
+3 outliers among *Monthly.Income* values
+
+```{r, dependson="loadData"}
+hist(loansData$Open.CREDIT.Lines,col="blue",breaks=50)
+quantile(loansData$Open.CREDIT.Lines)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Revolving.CREDIT.Balance,col="blue")
+quantile(loansData$Revolving.CREDIT.Balance)
+plot(loansData$Revolving.CREDIT.Balance,col="blue")
+hist(loansData$Revolving.CREDIT.Balance[loansData$Revolving.CREDIT.Balance < 150000],col="blue",breaks=60)
+loansData <- loansData[loansData$Revolving.CREDIT.Balance < 150000,]
+```
+
+6 outliers among *Revolving.Credit.Balance* values
+
+```{r, dependson="loadData"}
+hist(loansData$Inquiries.in.the.Last.6.Months,col="blue")
+quantile(loansData$Inquiries.in.the.Last.6.Months)
+```
+
+```{r, dependson="loadData"}
+hist(loansData$Percent.Funded,col="blue",breaks=100)
+quantile(loansData$Percent.Funded)
+```
+
+
+### Calculate percentage of loans that were 100% funded (or almost 100%) and those which were not funded at all
+
+```{r, dependson="loadData"}
+100*sum(loansData$Percent.Funded > 98)/nrow(loansData)
+100*sum(loansData$Percent.Funded == 0)/nrow(loansData)
+```
+
+
+### Plot interest rate versus FICO range
+
+```{r, dependson="loadData"}
+plot(loansData$FICO.Range,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+A clear association between *FICO.Range* and *Interest.Rate*. No big surprise here.
+
+### Plot interest rate versus debt to income ratio
+```{r, dependson="loadData"}
+plot(loansData$Debt.To.Income.Ratio,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+No clear association between *Debt.To.Income.Ratio* and *Interest.Rate*.
+
+### Plot interest rate versus amount requested
+```{r, dependson="loadData"}
+plot(loansData$Amount.Requested,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+lm0 <- lm(loansData$Interest.Rate ~ loansData$Amount.Requested)
+lines(loansData$Amount.Requested,lm0$fitted,col="red",lwd=3)
+```
+
+A not so strong association between *Amount.Requested* and *Interest.Rate*.
+
+### Plot interest rate versus loan length
+```{r, dependson="loadData"}
+plot(loansData$Loan.Length,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+A clear association between *Loan.Length* and *Interest.Rate*.
+
+### Plot interest rate versus monthly income
+```{r, dependson="loadData"}
+plot(loansData$Monthly.Income,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+No clear association between *Monthly.Income* and *Interest.Rate*.
+
+### Plot interest rate versus open credit lines
+```{r, dependson="loadData"}
+plot(loansData$Open.CREDIT.Lines,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+No clear association between *Open.CREDIT.Lines* and *Interest.Rate*.
+
+### Plot interest rate versus revolving credit balance
+```{r, dependson="loadData"}
+plot(loansData$Revolving.CREDIT.Balance,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+No clear association between *Revolving.CREDIT.Balance* and *Interest.Rate*.
+
+### Plot interest rate versus employment length
+```{r, dependson="loadData"}
+plot(loansData$Employment.Length,loansData$Interest.Rate,pch=19,col="blue",cex=0.5)
+```
+
+No clear association between *Employment.Length* and *Interest.Rate*.
+
+
+------
+
+## Modeling
+
+
+## Fit a basic model relating interest rate to FICO score
+
+```{r, dependson="loadData"}
+lm1 <- lm(loansData$Interest.Rate ~ loansData$FICO.Range)
+summary(lm1)
+```
+
+
+## Plot the observed ('black') and fitted ('red') points
+
+```{r, dependson="loadData"}
+plot(loansData$FICO.Range,loansData$Interest.Rate,pch=19)
+points(loansData$FICO.Range,lm1$fitted,pch=19,col="red")
+```
+
+
+## Look at residuals versus observations, residuals versus fitted values
+
+```{r, dependson="loadData"}
+par(mfrow=c(1,2))
+plot(loansData$FICO.Range,lm1$residuals,pch=19)
+plot(lm1$fitted,lm1$residuals,pch=19)
+```
+
+
+
+## Fit a basic model relating interest rate to FICO score and amount requested
+
+```{r, dependson="loadData"}
+lm2 <- lm(loansData$Interest.Rate ~ loansData$Amount.Requested)
+summary(lm2)
+plot(lm2$fitted,lm2$residuals,pch=19)
+```
+
+
+## Fit a basic model relating interest rate to FICO score and amount requested
+
+```{r, dependson="loadData"}
+lm3 <- lm(loansData$Interest.Rate ~ loansData$FICO.Range + loansData$Amount.Requested)
+summary(lm3)
+plot(lm3$fitted,lm3$residuals,pch=19)
+```
+
+
+## Fit a basic model relating interest rate to FICO score and loan length
+
+```{r, dependson="loadData"}
+lm4 <- lm(loansData$Interest.Rate ~ loansData$FICO.Range + loansData$Loan.Length)
+summary(lm4)
+```
+
+
+## Fit a basic model relating interest rate to FICO score, amount requested and loan length
+
+```{r, dependson="loadData"}
+lm5 <- lm(loansData$Interest.Rate ~ loansData$Amount.Requested + loansData$Loan.Length + loansData$FICO.Range)
+summary(lm5)
+```
+
+## Fit a basic model relating interest rate to FICO score, amount requested and loan length
+
+```{r, dependson="loadData"}
+lm10 <- lm(loansData$Interest.Rate ~ loansData$Loan.Purpose)
+summary(lm10)
+```
+
+## Let's use model 4
+
+```{r, dependson="lm5Chunk"}
+summary(lm4)
+confint(lm4)
+
+
+par(mfrow=c(2,2))
+
+hist(loansData$Amount.Requested,col="blue",breaks=20,main="",xlab="Amount requested (in dollars)")
+plot(loansData$FICO.Range,loansData$Interest.Rate,pch=19,col="blue",cex=0.5,xlab="FICO score range",ylab="Interest rate (%)")
+plot(lm2$fitted,lm2$residuals,pch=19,col=loansData$Loan.Length, xlab="Interest rate (%)", ylab="No Adjustment Residuals")
+plot(lm4$fitted,lm4$residuals,pch=19,col=loansData$Loan.Length, xlab="Interest rate (%)", ylab="Adjusted Residuals")
+
+
+par(mfrow=c(2,3))
+
+plot(loansData$Amount.Requested,loansData$Interest.Rate,pch=19,col="blue",cex=0.5,xlab="Amount Requested (in dollars)",ylab="Interest rate (%)")
+lm0 <- lm(loansData$Interest.Rate ~ loansData$Amount.Requested)
+lines(loansData$Amount.Requested,lm0$fitted,col="red",lwd=3)
+
+plot(loansData$FICO.Range,loansData$Interest.Rate,pch=19,col="blue",cex=0.5,xlab="FICO score range",ylab="Interest rate (%)")
+
+plot(loansData$Loan.Length,loansData$Interest.Rate,pch=19,col="blue",cex=0.5,xlab="Loan Length (in months)",ylab="Interest rate (%)")
+
+plot(lm2$fitted,lm2$residuals,pch=19,col=loansData$Loan.Length, xlab="Interest rate (%)", ylab="No Adjustment Residuals")
+plot(lm5$fitted,lm5$residuals,pch=19,col=loansData$Loan.Length, xlab="Interest rate (%)", ylab="Adjusted Residuals")
+
+
+```
+
+
+
