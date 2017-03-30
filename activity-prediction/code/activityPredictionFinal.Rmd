@@ -1,0 +1,164 @@
+Samsung Activity Prediction Study
+=================================
+
+---
+title: "Samsung Activity Prediction Study"
+output:
+  html_document:
+    keep_md: true
+---
+
+------
+
+### Load libraries
+
+```{r}
+library(tree)
+library(randomForest)
+```
+
+
+------
+
+## Processing
+
+Download the data, read the data in and save the raw data as an RDA file
+
+```{r loadData,cache=TRUE}
+#getwd()
+#download.file("https://spark-public.s3.amazonaws.com/dataanalysis/samsungData.rda",destfi#le="../../data/samsungData.rda")
+#dateDownloaded <- date()
+#dateDownloaded
+load('../data/samsungData.rda')
+```
+
+
+### Look at the data set
+
+```{r, dependson="loadData"}
+dim(samsungData)
+samsungData <- data.frame(samsungData)
+names(samsungData)[duplicated(names(samsungData))] # 84 duplicate column names found!
+samsungData <- data.frame(samsungData) # This removes duplicates
+names(samsungData) <- c(paste0("V",c(1:561)),"subject","activity") # this should also solve it!
+table(samsungData$activity)
+sapply(samsungData[1,],class)
+samsungData$activity <- sapply(samsungData$activity, factor) # set 'activity' variable to be a factor
+table(samsungData$subject)
+length(unique(samsungData$subject))
+```
+
+
+### Find out about missing values and take out imcomplete cases
+
+```{r, dependson="loadData"}
+table(is.na(samsungData))
+```
+
+### Building training and test sets and make necessary transformations
+
+```{r, dependson="loadData"}
+trainData <- samsungData[samsungData$subject %in% c(1,3,5,6,7,8,11,14,15,16,17,19,21,22,23,25,26),]
+trainData <- trainData[,-562] # Eliminate subject variable
+testData <- samsungData[samsungData$subject %in% c(27,28,29,30),]
+testData <- testData[,-562] # Eliminate subject variable
+```
+
+
+------
+
+## Exploratory Analysis
+
+### Plotting average acceleration for first subject
+
+```{r, dependson="loadData"}
+par(mfrow=c(1,2))
+numericActivity <- as.numeric(as.factor(samsungData$activity))[samsungData$subject==1]
+plot(samsungData[samsungData$subject==1,1], pch=19, col=numericActivity, ylab=names(samsungData)[1])
+plot(samsungData[samsungData$subject==1,2], pch=19, col=numericActivity, ylab=names(samsungData)[2])
+legend(150, -0.1, legend=unique(samsungData$activity), col=unique(numericActivity), pch=19)
+```
+
+
+### Plotting max acceleration for first subject
+
+```{r, dependson="loadData"}
+par(mfrow=c(1,2))
+plot(samsungData[samsungData$subject==1,10], pch=19, col=numericActivity, ylab=names(samsungData)[10])
+plot(samsungData[samsungData$subject==1,11], pch=19, col=numericActivity, ylab=names(samsungData)[11])
+```
+
+
+
+------
+
+## Predictive Modeling
+
+
+## Build a predictive tree model from the training data set
+
+```{r, dependson="loadData"}
+tree1 <- tree(activity ~ ., data=trainData)
+summary(tree1)
+plot(tree1)
+text(tree1)
+```
+
+
+## Cross-validate tree model
+
+```{r, dependson="loadData"}
+plot(cv.tree(tree1,FUN=prune.tree,method="misclass"))
+plot(cv.tree(tree1))
+```
+
+
+## Prune the tree
+
+```{r, dependson="loadData"}
+pruneTree <- prune.tree(tree1, best=6)
+summary(pruneTree)
+plot(pruneTree)
+text(pruneTree)
+```
+
+
+## Show resubstitution error
+
+```{r, dependson="loadData"}
+table(trainData$activity, predict(pruneTree,type="class"))
+table(trainData$activity, predict(tree1,type="class"))
+sum(predict(pruneTree,type="class") != trainData$activity)/length(trainData$activity)
+sum(predict(tree1,type="class") != trainData$activity)/length(trainData$activity)
+```
+
+
+## Random forest
+
+```{r, dependson="loadData"}
+forest1 <- randomForest(activity ~ ., data=trainData, prox=TRUE)
+forest1
+sum(predict(forest1, type="class") != trainData$activity)/length(trainData$activity)
+```
+
+
+## Prediction with test set
+
+```{r, dependson="loadData"}
+sum(predict(tree1, testData, type="class") != testData$activity)/length(testData$activity)
+sum(predict(pruneTree, testData, type="class") != testData$activity)/length(testData$activity)
+sum(predict(forest1, testData, type="class") != testData$activity)/length(testData$activity)
+```
+
+## Final graphs
+
+```{r, dependson="loadData"}
+par(mfrow=c(2,2))
+plot(tree1)
+text(tree1)
+plot(pruneTree)
+text(pruneTree)
+plot(cv.tree(tree1,FUN=prune.tree,method="misclass"))
+plot(cv.tree(tree1))
+```
+
