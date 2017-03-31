@@ -29,7 +29,7 @@ To relate Lending Club interest rate to FICO score and other variables we perfor
 
 ### *Reproducibility*
 
-All analyses performed in this manuscript are reproduced in the R markdown file [lendingclubFinal.Rmd](code/lendingclubFinal.md) [7].
+All analyses performed in this manuscript are reproduced in the R markdown file [lendingclubFinal.Rmd](code/README.md) [7].
 
 ## **Results**
 

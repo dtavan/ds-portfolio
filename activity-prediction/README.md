@@ -23,7 +23,7 @@ The original dataset was split into, 1) a training set containing 80% of the ori
 
 ### *Reproducibility*
 
-All analyses performed in this manuscript are reproduced in the R markdown file [activityPredictionFinal.Rmd](code/activityPredictionFinal.md) [5].
+All analyses performed in this manuscript are reproduced in the R markdown file [activityPredictionFinal.Rmd](code/README.md) [5].
 
 ## **Analysis**
 
