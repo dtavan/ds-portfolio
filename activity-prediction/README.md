@@ -27,11 +27,9 @@ All analyses performed in this manuscript are reproduced in the R markdown file 
 
 ## **Analysis**
 
-DO NOT FORGET TO REFER TO FIGURES BY NUMBER IN TEXT!!!
-
 The Samsung phone activity data used in the present analysis contains records for 21 of the original 30 subjects. The data set contains 563 variables, of which 561 correspond to quantitative measurements of 3-axial linear acceleration and 3-axial angular velocity. The qualitative measurements are presented in the form of summary statistics for each one of the original measurements. The variable name identifies the variable (linear acceleration or angular velocity), the summary statistics and the axis. For example, the first variable of the data set is `tBodyAcc-mean()-X` which corresponds to the mean linear acceleration on the X axis. The last 2 variables are respectively a qualitative variable for subject identification (an integer between 1 and 30) and a qualitative variable related to the activity performed by the subject (possible levels are *Walking, Walking upstairs, Walking downstairs, Sitting, Standing and Laying*).
 
-Since the data set was pre-processed, no missing values were identified. Once the original data set was subsetted into training and test data sets, the `subject` variable (in column 562) was eliminated from both data sets since it is neither an outcome variable nor a covariate. Another transformation consisted in setting the `activity` variable to be a factor variable in both the training and test sets. It also appeared that there were 84 duplicate solumn names, so we had to rename all the columns before being able to apply the modeling functions.
+Since the data set was pre-processed, no missing values were identified. Once the original data set was subsetted into training and test data sets, the `subject` variable (in column 562) was eliminated from both data sets since it is neither an outcome variable nor a covariate. Another transformation consisted in setting the `activity` variable to be a factor variable in both the training and test sets. It also appeared that there were 84 duplicate column names, so we had to rename all the columns before being able to apply the modeling functions.
 
 ### *Model features and prediction function*
 
@@ -39,6 +37,9 @@ Since there were so many potential covariates for our model (561!) there was no 
 
 We therefore used the `tree` function to build a prediction tree on the training data set and obtained in return the classification tree shown in *Fig. 1 - Upper Left Panel*. The resulting tree had 8 splits and 9 terminal nodes and summary statistics revealed a misclassification error rate of 0.09357, which means that the model could accurately classify the activity in more than 90% of the observations of the training data set.
 
+The following table shows the confusion matrix for the classification tree, and reveals that prediction accuracy varied quite significantly from one activity to the other. Some activities were always accurately predicted (e.g., *laying*) while some other activities seemed more difficult to accurately predict (e.g., make the difference between walking activities).
+
+![Table1](figures/table01.png)
 
 ### *Cross-validation*
 
@@ -51,8 +52,11 @@ When building a predictive model, there are 4 aspects of modeling that should be
 
 The first two aspects are of particular importance since in general some trade-offs should be made between getting better accuracy on training data set and avoiding overfitting data to training data set. Of the remaining two aspects, the computational speed is of lesser importance in our case, and model interpretability is somewhat subjective.
 
-By cross-validating our classification tree model, we were able to determine that model size could be slightly reduced with a minimal variation in accuracy but a significant improvement in model simplicity and interpretability. As shown in *Fig. 1 - Lower Left Panel*, a significant reduction of the missclasification rate was observed for a model size of 6 or higher, but the difference in missclasification rate between size 6 and 8 was negligible. Looking at the prediction error on the deviance scale led to the same conclusion, as shown on *Fig. 1 - Lower Right Panel*. It should be noted though, that according to the cross-validation analysis, a bigger model size would still give us better prediction without risking overfitting, so our choice for the model size should depend more on other factors, like model simplicity and interpretability for instance. In our case, we decided to accept a slight reduction in accuracy (less that 1.5% difference in misclassifiction error rate) in order to produce a simpler model that was also more easily interpreted. We therefore pruned the original tree and requested a tree with exactly 6 terminal nodes, 1 node per activity level. The resulting tree is shown in *Fig. 1 - Upper Right Panel*. It has 6 terminal nodes as requested, only 5 splits, and its misclassification error rate is only 1.5% higher than that of the original tree. We therefore decided to keep this model, as it is simpler and easier to understand.
+By cross-validating our classification tree model, we were able to determine that model size could be slightly reduced with a minimal variation in accuracy but a significant improvement in model simplicity and interpretability. As shown in *Fig. 1 - Lower Left Panel*, a significant reduction of the missclasification rate was observed for a model size of 6 or higher, but the difference in missclasification rate between size 6 and 8 was negligible. Looking at the prediction error on the deviance scale led to the same conclusion, as shown on *Fig. 1 - Lower Right Panel*. It should be noted though, that according to the cross-validation analysis, a bigger model size would still give us better prediction without risking overfitting, so our choice for the model size should depend more on other factors, like model simplicity and interpretability for instance. In our case, we decided to accept a slight reduction in accuracy (less that 1.5% difference in misclassification error rate) in order to produce a simpler model that was also more easily interpreted. We therefore pruned the original tree and requested a tree with exactly 6 terminal nodes, 1 node per activity level. The resulting tree is shown in *Fig. 1 - Upper Right Panel*. It has 6 terminal nodes as requested, only 5 splits, and its misclassification error rate is only 1.5% higher than that of the original tree. We therefore decided to keep this model, as it is simpler and easier to understand.
 
+The confusion matrix for the pruned tree model that is shown below reveals that model simplification did not affect prediction accuracy for *standing*, *sitting*, *laying* and *walkdown* activities, which means that the decrease in prediction accuracy only slightly affected 2 of the 6 activities, namely *walk* and *walkup*.
+
+![Table2](figures/table02.png)
 
 ### *Error rate on test data set*
 
@@ -61,13 +65,12 @@ The last step in building our prediction model was to apply it on the test data 
 Our prediction model applied to the test data set gave a misclassification rate of 0.1380, which was only slightly higher than the error rate that was obtained on the training data set (0.1084). This result was a confirmation that our model was not overfitted to the training data set, since it could quite accurately predict activity on the test data set, and could therefore be considered a relatively accurate prediction model of human activity based on smartphone sensor measurements.
 
 
-![Figure](figures/figure.png)
+![Figure](figures/figures.png)
 
 - **Upper Left Panel.** A classification tree of human activity based on smartphone sensors measurements. This is the original tree, which has 9 terminal nodes and 8 splits.
 - **Upper Right Panel.** A pruned classification tree of human activity based on smartphone sensors measurements. This is the reduced-size classification tree with only 6 terminal nodes and 5 splits.
 - **Lower Left Panel.** Evolution of the misclassification rate depending on model size. This figure shows that starting from size 6 the accuracy of the model does not significantly improve anymore with increased model size.
 - **Lower Right Panel.** Evolution of the residual mean deviance depending on model size. This figure confirms what was observed for the misclassification rate, showing no substantial increase in model accuracy when model size is increased beyond 6.
-
 
 
 ## **Conclusions**

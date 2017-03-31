@@ -48,7 +48,7 @@ where b0 is an intercept term and b1 represents the change in interest rate asso
 
 We observed a highly statistically significant (P < 2e-16) association between interest rate and amount requested. A change of one dollar of requested amount corresponded to a change of b1 = 0.0001445 in percent of interest rate (95% Confidence Interval: 0.0001336, 0.0001554). So for example, for two loans of the same length and whith the same applicant's FICO score, we would expect a $20,000 loan request to have an interest rate 1.445% higher than a $10,000 loan request. We would expect the same difference between a $30,000 and $20,000 loan requests and so forth.
 
-![Figure](figures/figure.png)
+![Figure](figures/figures.png)
 
 ## **Conclusions**
 
