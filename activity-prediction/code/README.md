@@ -323,7 +323,7 @@ plot(samsungData[samsungData$subject==1,2], pch=19, col=numericActivity, ylab=na
 legend(150, -0.1, legend=unique(samsungData$activity), col=unique(numericActivity), pch=19)
 ```
 
-![](figure/unnamed-chunk-5-1.png)<!-- -->
+![](figures/unnamed-chunk-5-1.png)<!-- -->
 
 
 ### Plotting max acceleration for first subject
@@ -335,7 +335,7 @@ plot(samsungData[samsungData$subject==1,10], pch=19, col=numericActivity, ylab=n
 plot(samsungData[samsungData$subject==1,11], pch=19, col=numericActivity, ylab=names(samsungData)[11])
 ```
 
-![](figure/unnamed-chunk-6-1.png)<!-- -->
+![](figures/unnamed-chunk-6-1.png)<!-- -->
 
 
 
@@ -368,7 +368,7 @@ plot(tree1)
 text(tree1)
 ```
 
-![](figure/unnamed-chunk-7-1.png)<!-- -->
+![](figures/unnamed-chunk-7-1.png)<!-- -->
 
 
 ## Cross-validate tree model
@@ -378,13 +378,13 @@ text(tree1)
 plot(cv.tree(tree1,FUN=prune.tree,method="misclass"))
 ```
 
-![](figure/unnamed-chunk-8-1.png)<!-- -->
+![](figures/unnamed-chunk-8-1.png)<!-- -->
 
 ```r
 plot(cv.tree(tree1))
 ```
 
-![](figure/unnamed-chunk-8-2.png)<!-- -->
+![](figures/unnamed-chunk-8-2.png)<!-- -->
 
 
 ## Prune the tree
@@ -411,7 +411,7 @@ plot(pruneTree)
 text(pruneTree)
 ```
 
-![](figure/unnamed-chunk-9-1.png)<!-- -->
+![](figures/unnamed-chunk-9-1.png)<!-- -->
 
 
 ## Show resubstitution error
@@ -540,4 +540,4 @@ plot(cv.tree(tree1,FUN=prune.tree,method="misclass"))
 plot(cv.tree(tree1))
 ```
 
-![](figure/unnamed-chunk-13-1.png)<!-- -->
+![](figures/unnamed-chunk-13-1.png)<!-- -->

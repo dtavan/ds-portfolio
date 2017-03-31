@@ -1,5 +1,11 @@
-Raw Lending Club Analysis
-========================
+---
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+Lending Club Analysis
+=====================
 
 ------
 
@@ -18,10 +24,10 @@ Download the data, read the data in and save the raw data as an RDA file
 
 ```{r loadData,cache=TRUE}
 getwd()
-download.file("https://spark-public.s3.amazonaws.com/dataanalysis/loansData.rda",destfile="../../data/loansData.rda")
-dateDownloaded <- date()
-dateDownloaded
-load('../../data/loansData.rda')
+#download.file("https://spark-public.s3.amazonaws.com/dataanalysis/loansData.rda",destfile="../../data/loansData.rda")
+#dateDownloaded <- date()
+#dateDownloaded
+load('../data/loansData.rda')
 ```
 
 
